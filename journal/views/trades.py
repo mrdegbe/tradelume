@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import TradeLog
-from .serializers import TradeLogSerializer
+from journal.models import TradeLog
+from journal.serializers import TradeLogSerializer
 
 class TradeLogViewSet(viewsets.ModelViewSet):
     queryset = TradeLog.objects.all()
