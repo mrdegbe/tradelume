@@ -6,4 +6,4 @@ class TradeLogViewSetPermissionTests(APITestCase):
     def test_unauthenticated_user_cannot_access_tradelogs(self):
         url = reverse('tradelog-list')  # Adjust if you’re using a router with different naming
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
