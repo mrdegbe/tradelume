@@ -60,3 +60,6 @@ class TestAnalyticsAPI:
 
         assert "max_drawdown" in data
         assert isinstance(data["max_drawdown"], float)
+
+        assert "average_holding_time" in data
+        assert isinstance(data["average_holding_time"], float)

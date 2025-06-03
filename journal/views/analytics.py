@@ -18,11 +18,13 @@ def get_analytics(request):
             "net_profit": 0,
             "average_profit": 0,  # 👈 added
             "max_drawdown": 0,
+            "average_holding_time": 0.0,
         })
 
     wins, losses, rr_ratios = [], [], []
     net_profit = 0
     equity_curve = []
+    holding_durations = []
 
     for trade in trades:
         # 👇 Calculate profit dynamically since there's no profit field
@@ -40,6 +42,11 @@ def get_analytics(request):
         reward = abs(trade.exit_price - trade.entry_price)
         if risk > 0:
             rr_ratios.append(reward / risk)
+
+        # 🕒 Holding time
+        if trade.entry_time and trade.exit_time:
+            duration = trade.exit_time - trade.entry_time
+            holding_durations.append(duration.total_seconds())
 
     # 👇 Updated win rate and profit factor calculations
     win_rate = round((len(wins) / total_trades) * 100, 2)
@@ -59,6 +66,9 @@ def get_analytics(request):
         if dd > max_dd:
             max_dd = dd
 
+    avg_holding_time = round((sum(holding_durations) / len(holding_durations)) / 3600,
+                             2) if holding_durations else 0  # in hours
+
     return Response({
         "total_trades": total_trades,
         "win_rate": win_rate,
@@ -67,4 +77,5 @@ def get_analytics(request):
         "net_profit": round(net_profit, 2),
         "average_profit": average_profit,
         "max_drawdown": round(max_dd, 2),
+        "average_holding_time": float(round(avg_holding_time, 2)),
     })

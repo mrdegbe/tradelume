@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 class TradeLog(models.Model):
@@ -16,6 +17,8 @@ class TradeLog(models.Model):
     take_profit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     notes = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    entry_time = models.DateTimeField(default=timezone.now)
+    exit_time = models.DateTimeField(null=True, blank=True)
 
     @property
     def profit(self):
