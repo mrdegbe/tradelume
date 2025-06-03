@@ -2,11 +2,28 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from journal.models import TradeLog
+from datetime import datetime
+
+def parse_date(date_str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_analytics(request):
     trades = TradeLog.objects.filter(user=request.user)
+
+    # ⏱️ Optional date filtering
+    start_date = parse_date(request.query_params.get("start_date", ""))
+    end_date = parse_date(request.query_params.get("end_date", ""))
+
+    if start_date:
+        trades = trades.filter(entry_time__date__gte=start_date)
+    if end_date:
+        trades = trades.filter(entry_time__date__lte=end_date)
+
     total_trades = trades.count()
 
     if total_trades == 0:
