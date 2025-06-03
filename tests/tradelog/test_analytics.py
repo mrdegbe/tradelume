@@ -53,9 +53,10 @@ class TestAnalyticsAPI:
         assert data["total_trades"] == 3
 
         assert "win_rate" in data
-        # assert data["win_rate"] > 0
-        assert "win_rate" in data
         assert isinstance(data["win_rate"], float)
 
         assert "average_profit" in data
         assert isinstance(data["average_profit"], float)
+
+        assert "max_drawdown" in data
+        assert isinstance(data["max_drawdown"], float)

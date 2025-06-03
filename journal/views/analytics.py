@@ -17,18 +17,18 @@ def get_analytics(request):
             "profit_factor": 0,
             "net_profit": 0,
             "average_profit": 0,  # 👈 added
+            "max_drawdown": 0,
         })
 
-    wins = []
-    losses = []
-    net_profit = 0  # 👈 New accumulator for net profit
-
-    rr_ratios = []
+    wins, losses, rr_ratios = [], [], []
+    net_profit = 0
+    equity_curve = []
 
     for trade in trades:
         # 👇 Calculate profit dynamically since there's no profit field
         profit = trade.exit_price - trade.entry_price
         net_profit += profit
+        equity_curve.append(net_profit)
 
         if profit > 0:
             wins.append(profit)
@@ -49,6 +49,16 @@ def get_analytics(request):
     profit_factor = round(gross_profit / gross_loss, 2)
     average_profit = round(net_profit / total_trades, 2)
 
+    # 👉 Max drawdown calculation
+    peak = equity_curve[0]
+    max_dd = 0
+    for equity in equity_curve:
+        if equity > peak:
+            peak = equity
+        dd = peak - equity
+        if dd > max_dd:
+            max_dd = dd
+
     return Response({
         "total_trades": total_trades,
         "win_rate": win_rate,
@@ -56,4 +66,5 @@ def get_analytics(request):
         "profit_factor": profit_factor,
         "net_profit": round(net_profit, 2),
         "average_profit": average_profit,
+        "max_drawdown": round(max_dd, 2),
     })
