@@ -17,6 +17,12 @@ class TradeLog(models.Model):
     notes = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def profit(self):
+        if self.entry_price is not None and self.exit_price is not None:
+            return self.exit_price - self.entry_price
+        return None
+
     def __str__(self):
         return f"{self.user.username} - {self.pair} ({self.direction})"
 
