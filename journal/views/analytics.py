@@ -18,22 +18,20 @@ def parse_date(date_str, field_name):
 def get_analytics(request):
     trades = TradeLog.objects.filter(user=request.user)
 
-    start_date_str = request.query_params.get("start_date", "")
-    end_date_str = request.query_params.get("end_date", "")
+    start_date_str = request.query_params.get("start_date")
+    end_date_str = request.query_params.get("end_date")
 
-    start_date, start_error = parse_date(start_date_str, "start_date")
-    end_date, end_error = parse_date(end_date_str, "end_date")
+    start_date, end_date = None, None
 
-    if start_error or end_error:
-        return Response(
-            {"error": start_error or end_error},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    if start_date_str:
+        start_date, start_error = parse_date(start_date_str, "start_date")
+        if start_error:
+            return Response({"error": start_error}, status=status.HTTP_400_BAD_REQUEST)
 
-    if start_date:
-        trades = trades.filter(entry_time__date__gte=start_date)
-    if end_date:
-        trades = trades.filter(entry_time__date__lte=end_date)
+    if end_date_str:
+        end_date, end_error = parse_date(end_date_str, "end_date")
+        if end_error:
+            return Response({"error": end_error}, status=status.HTTP_400_BAD_REQUEST)
 
     total_trades = trades.count()
 
