@@ -1,23 +1,34 @@
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from journal.models import TradeLog
 from datetime import datetime
 
-def parse_date(date_str):
+
+def parse_date(date_str, field_name):
     try:
-        return datetime.strptime(date_str, "%Y-%m-%d").date()
+        return datetime.strptime(date_str, "%Y-%m-%d").date(), None
     except ValueError:
-        return None
+        return None, f"Invalid date for '{field_name}'. Expected format: YYYY-MM-DD and must be a real date."
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_analytics(request):
     trades = TradeLog.objects.filter(user=request.user)
 
-    # ⏱️ Optional date filtering
-    start_date = parse_date(request.query_params.get("start_date", ""))
-    end_date = parse_date(request.query_params.get("end_date", ""))
+    start_date_str = request.query_params.get("start_date", "")
+    end_date_str = request.query_params.get("end_date", "")
+
+    start_date, start_error = parse_date(start_date_str, "start_date")
+    end_date, end_error = parse_date(end_date_str, "end_date")
+
+    if start_error or end_error:
+        return Response(
+            {"error": start_error or end_error},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     if start_date:
         trades = trades.filter(entry_time__date__gte=start_date)
